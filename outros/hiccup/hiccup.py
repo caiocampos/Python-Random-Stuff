@@ -1,10 +1,12 @@
 import pyautogui
-from pyautogui import moveRel, moveTo, size, position, FailSafeException
+from pyautogui import moveRel, moveTo, scroll, size, position, FailSafeException
 from time import sleep
-from random import randrange
+from random import randrange, randint
 
 
+MOVE_TIME = 0.101
 CHECK_TIME = 5
+MAX_TIME = CHECK_TIME * CHECK_TIME
 
 
 def center():
@@ -22,11 +24,21 @@ def hiccup():
     while True:
         try:
             if lastPosition == position():
-                x, y = randrange(-9, 9), randrange(-9, 9)
-                moveRel(x, y)
-                moveRel(-x, -y)
+                if randrange(7) == 1:
+                    y = randrange(-1, 1)
+                    scroll(y)
+                    scroll(-y)
+                else:
+                    x, y = randrange(-9, 9), randrange(-9, 9)
+                    moveRel(x, y, MOVE_TIME)
+                    moveEndPos = position()
+                    sleep(CHECK_TIME)
+                    if moveEndPos == position():
+                        moveTo(lastPosition.x, lastPosition.y, MOVE_TIME)
+                    else:
+                        lastPosition = position()
 
-                sleep(randrange(5, 25))
+                sleep(randrange(CHECK_TIME, MAX_TIME))
             else:
                 lastPosition = position()
                 sleep(CHECK_TIME)
