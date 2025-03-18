@@ -1,7 +1,14 @@
-import pyautogui
-from pyautogui import moveRel, moveTo, scroll, size, position, FailSafeException
+from pyautogui import (
+    moveRel,
+    moveTo,
+    scroll,
+    size,
+    position,
+    FailSafeException,
+    FAILSAFE,
+)
 from time import sleep
-from random import randrange, randint
+from random import randrange
 
 
 MOVE_TIME = 0.101
@@ -12,9 +19,9 @@ MAX_TIME = CHECK_TIME * CHECK_TIME
 def center():
     x, y = size()
     moveX, moveY = x / 2, y / 2
-    pyautogui.FAILSAFE = False
+    FAILSAFE = False
     moveTo(moveX, moveY)
-    pyautogui.FAILSAFE = True
+    FAILSAFE = True
 
 
 def hiccup():
@@ -47,6 +54,3 @@ def hiccup():
         except FailSafeException:
             print("Could not move, moving to center")
             center()
-
-
-hiccup()

@@ -1,5 +1,3 @@
 cd "$(dirname "$0")"
 
-source .venv/bin/activate
-
-sudo python3 editor.py
+sudo -E env PATH="$PATH" uv run editor

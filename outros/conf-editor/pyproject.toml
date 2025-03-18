@@ -1,0 +1,19 @@
+[project]
+name = "conf-editor"
+version = "0.1.0"
+description = "Utilitário para automatizar alteração de arquivos do sistema"
+authors = [
+    { name = "Caio Campos", email = "20524962+caiocampos@users.noreply.github.com" }
+]
+requires-python = ">= 3.12"
+dependencies = []
+
+[project.scripts]
+"editor" = "editor:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/editor"]
