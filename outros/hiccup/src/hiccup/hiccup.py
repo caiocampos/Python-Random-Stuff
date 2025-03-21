@@ -1,11 +1,11 @@
+import pyautogui
 from pyautogui import (
     moveRel,
     moveTo,
     scroll,
     size,
     position,
-    FailSafeException,
-    FAILSAFE,
+    FailSafeException
 )
 from time import sleep
 from random import randrange
@@ -19,9 +19,13 @@ MAX_TIME = CHECK_TIME * CHECK_TIME
 def center():
     x, y = size()
     moveX, moveY = x / 2, y / 2
-    FAILSAFE = False
-    moveTo(moveX, moveY)
-    FAILSAFE = True
+    
+    try:
+        pyautogui.FAILSAFE = False
+        moveTo(moveX, moveY)
+        pyautogui.FAILSAFE = True
+    except Exception as e:
+        print(f"Unexpected Error {e}, {type(e)}")
 
 
 def hiccup():
@@ -33,6 +37,7 @@ def hiccup():
             if lastPosition == position():
                 if randrange(7) == 1:
                     y = randrange(-1, 1)
+                    
                     scroll(y)
                     scroll(-y)
                 else:
@@ -54,3 +59,5 @@ def hiccup():
         except FailSafeException:
             print("Could not move, moving to center")
             center()
+        except Exception as e:
+            print(f"Unexpected Error {e}, {type(e)}")
