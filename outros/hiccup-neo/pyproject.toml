@@ -1,13 +1,13 @@
 [project]
 name = "hiccup"
-version = "0.1.0"
+version = "0.2.0"
 description = "Utilitário para automatizar controle do mouse no sistema"
 authors = [
     { name = "Caio Campos", email = "20524962+caiocampos@users.noreply.github.com" }
 ]
 requires-python = ">= 3.12"
 dependencies = [
-    "pyautogui>=0.9.54",
+    "evdev>=1.9.3",
 ]
 
 [project.scripts]

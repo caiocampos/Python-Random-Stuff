@@ -1,0 +1,3 @@
+cd "$(dirname "$0")"
+
+sudo -E env PATH="$PATH" uv run hiccup
