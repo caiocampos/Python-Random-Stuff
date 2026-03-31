@@ -1,16 +1,24 @@
-from evdev import UInput, InputDevice, list_devices, ecodes
-from time import sleep
+from typing import Iterator
+from time import localtime, strftime, sleep
 from random import randrange
 from math import copysign
 from select import select
+from evdev import UInput, InputDevice, list_devices
+from evdev.ecodes import EV_REL, REL_X, REL_Y, REL_WHEEL
+from evdev.events import InputEvent
+
 
 MOVE_TIME = 0.071
 CHECK_TIME = 5
 MAX_TIME = CHECK_TIME * CHECK_TIME
 
-capabilities = {ecodes.EV_REL: (ecodes.REL_X, ecodes.REL_Y, ecodes.REL_WHEEL)}
+capabilities = {EV_REL: (REL_X, REL_Y, REL_WHEEL)}
 
 uInput = UInput(capabilities, name="virtual-pointer-hiccup")
+
+
+def log(text):
+    print(strftime("%H:%M:%S > ", localtime()) + text)
 
 
 def smooth_move(dx: int, dy: int, duration: int, steps: int = 10):
@@ -30,8 +38,8 @@ def smooth_move(dx: int, dy: int, duration: int, steps: int = 10):
         intStepY = int(accStepY)
         accStepX -= intStepX
         accStepY -= intStepY
-        uInput.write(ecodes.EV_REL, ecodes.REL_X, intStepX)
-        uInput.write(ecodes.EV_REL, ecodes.REL_Y, intStepY)
+        uInput.write(EV_REL, REL_X, intStepX)
+        uInput.write(EV_REL, REL_Y, intStepY)
         uInput.syn()
 
         sleep(sleepTime)
@@ -44,7 +52,7 @@ def smooth_scroll(dy: int, duration: int):
     sleepTime = duration / abs(dy)
 
     for _ in range(abs(dy)):
-        uInput.write(ecodes.EV_REL, ecodes.REL_WHEEL, int(copysign(1, dy)))
+        uInput.write(EV_REL, REL_WHEEL, int(copysign(1, dy)))
         uInput.syn()
 
         sleep(sleepTime)
@@ -57,10 +65,10 @@ def find_mouses() -> list[InputDevice[str]] | None:
         name = dev.name.lower()
         if "mouse" in name or "touchpad" in name:
             devices.append(dev)
-        
+
     if len(devices) > 0:
         return devices
-    
+
     return None
 
 
@@ -68,14 +76,23 @@ def has_moved(devices: list[InputDevice[str]], timeout: int) -> bool:
     r, _, _ = select(devices, [], [], timeout)
     if r:
         for device in devices:
-            for event in device.read():
-                if event.type == ecodes.EV_REL:
-                    return True
+            try:
+                events: Iterator[InputEvent] = device.read()
+                for event in events:
+                    if event.type == EV_REL:
+                        return True
+            except BlockingIOError:
+                continue
     return False
 
 
 def hiccup():
+    log("Starting")
     mouses = find_mouses()
+
+    if mouses is None:
+        log("No mouse found!")
+        return
 
     sleep(CHECK_TIME)
     while True:
@@ -101,4 +118,4 @@ def hiccup():
         except KeyboardInterrupt:
             break
         except Exception as e:
-            print(f"Unexpected Error {e}, {type(e)}")
+            log(f"Unexpected Error, {e}, {type(e)}, restarting")
