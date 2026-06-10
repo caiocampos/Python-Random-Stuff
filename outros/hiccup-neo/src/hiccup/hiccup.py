@@ -87,35 +87,46 @@ def has_moved(devices: list[InputDevice[str]], timeout: int) -> bool:
 
 
 def hiccup():
-    log("Starting")
-    mouses = find_mouses()
+    try:
+        log("Starting")
+        mouses = find_mouses()
 
-    if mouses is None:
-        log("No mouse found!")
-        return
+        if mouses is None:
+            log("No mouse found!")
+            return
 
-    sleep(CHECK_TIME)
-    while True:
-        try:
-            hasMoved = has_moved(mouses, CHECK_TIME)
-            if not hasMoved:
-                if randrange(17) == 1:
-                    y = randrange(-1, 1)
+        sleep(CHECK_TIME)
+        while True:
+            try:
+                hasMoved = has_moved(mouses, CHECK_TIME)
+                if not hasMoved:
+                    if randrange(17) == 1:
+                        y = randrange(-1, 1)
 
-                    smooth_scroll(y, MOVE_TIME)
-                    smooth_scroll(-y, MOVE_TIME)
+                        smooth_scroll(y, MOVE_TIME)
+                        smooth_scroll(-y, MOVE_TIME)
+                    else:
+                        x, y = randrange(-9, 9), randrange(-9, 9)
+                        smooth_move(x, y, MOVE_TIME)
+                        sleep(CHECK_TIME)
+                        hasMoved = has_moved(mouses, CHECK_TIME)
+                        if not hasMoved:
+                            smooth_move(-x, -y, MOVE_TIME)
+
+                    sleep(randrange(CHECK_TIME, MAX_TIME))
+                    mouses = find_mouses()
                 else:
-                    x, y = randrange(-9, 9), randrange(-9, 9)
-                    smooth_move(x, y, MOVE_TIME)
                     sleep(CHECK_TIME)
-                    hasMoved = has_moved(mouses, CHECK_TIME)
-                    if not hasMoved:
-                        smooth_move(-x, -y, MOVE_TIME)
+            except KeyboardInterrupt:
+                break
+            except OSError as e:
+                if e.errno == 19:
+                    sleep(CHECK_TIME)
+                    mouses = find_mouses()
 
-                sleep(randrange(CHECK_TIME, MAX_TIME))
-            else:
-                sleep(CHECK_TIME)
-        except KeyboardInterrupt:
-            break
-        except Exception as e:
-            log(f"Unexpected Error, {e}, {type(e)}, restarting")
+                log(f"OS Error, {e}, {type(e)}, restarting")
+            except Exception as e:
+                log(f"Unexpected Error, {e}, {type(e)}, restarting")
+
+    except KeyboardInterrupt:
+        return
